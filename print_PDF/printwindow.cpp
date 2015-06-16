@@ -15,7 +15,7 @@ void PrintWindow::printFlowerGuide(const QStringList &entries)
 {
     QString html;
     foreach (QString entry, entries) {
-        QStringList fields = entry.split(": ");
+        QStringList fields = entry.split(":");
         QString title = QString(fields[0]).toHtmlEscaped();
         QString body = QString(fields[1]).toHtmlEscaped();
         html += "<table width=\"100%\" border=1 cellspacing=0>\n"
@@ -30,7 +30,6 @@ void PrintWindow::printHtml(const QString &html)
 {
     QPrintDialog printDialog(&printer);
     if (printDialog.exec()) {
-        QPainter painter(&printer);
         QTextDocument textDocument;
         textDocument.setHtml(html);
         textDocument.print(&printer);
