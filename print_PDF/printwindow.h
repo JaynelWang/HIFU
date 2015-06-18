@@ -27,7 +27,7 @@ private:
          double TargetSize_Y;
          double TargetSize_Z;
         };
-    QList<PatientInfo> patientList;
+    QList<PatientInfo> PatientList;
 
     struct TreatmentPlan
         {double Spot_X;
