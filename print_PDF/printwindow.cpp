@@ -9,7 +9,7 @@ PrintWindow::PrintWindow()
     PatientList << PatientInfo2Print;
     TreatmentPlan TP[]={{0,0,140,7.8,15,500,50,300},{-1.04,5.91,140,7.8,15,500,50,300},
                         {1.04,-5.91,140,7.8,15,500,50,300},{5.91,1.04,140,7.8,15,500,50,300},{-5.91,-1.04,140,7.8,15,500,50,300}};
-    for(int i=0; i<sizeof(TP)/48; i++)
+    for(int i=0; i<sizeof(TP)/sizeof(TreatmentPlan); i++)
         {
             allTP << TP[i];
         }
@@ -17,7 +17,7 @@ PrintWindow::PrintWindow()
 
 PrintWindow::~PrintWindow()
 {
-printer.~QPrinter();
+
 }
 
 
@@ -71,6 +71,7 @@ void PrintWindow::generateHtml()
 
 void PrintWindow::printTP(const QString &html)
 {
+    bool isprinted = false;
     QPrintDialog printDialog(&printer);
     printer.setResolution(QPrinter::HighResolution);
     if (printDialog.exec()) {
@@ -78,5 +79,10 @@ void PrintWindow::printTP(const QString &html)
         textDocument.setHtml(html);
         textDocument.print(&printer);
         textDocument.end();
+        isprinted = true;
+    }
+    if (isprinted)
+    {
+        exit(0);
     }
 }
