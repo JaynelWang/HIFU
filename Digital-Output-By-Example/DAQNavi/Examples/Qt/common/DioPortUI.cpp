@@ -1,6 +1,6 @@
 #include "DioPortUI.h"
 
-DioPortUI::DioPortUI(QWidget *parent, Qt::WFlags flags, int index, quint8 state, QString* images)
+DioPortUI::DioPortUI(QWidget *parent, Qt::WindowFlags flags, int index, quint8 state, QString* images)
 	: QWidget(parent, flags)
 {
 	this->key = index;

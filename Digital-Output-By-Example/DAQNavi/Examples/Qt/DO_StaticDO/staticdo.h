@@ -11,7 +11,7 @@ class StaticDO : public QDialog
 	Q_OBJECT
 
 public:
-    StaticDO(QWidget *parent = 0, Qt::WFlags flags = 0);
+    StaticDO(QWidget *parent = 0, Qt::WindowFlags flags = 0);
 	~StaticDO();
 
 	void Initialize();

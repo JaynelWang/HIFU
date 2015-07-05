@@ -2,13 +2,19 @@
 #define DIOPORTUI_H
 
 #include <QtGui>
+#include <QGroupBox>
+#include <QButtonGroup>
+#include <QPushButton>
+#include <QHBoxLayout>
+#include <QLineEdit>
+#include <QString>
 
 class DioPortUI : public QWidget
 {
 	Q_OBJECT
 
 public:
-    DioPortUI(QWidget *parent = 0, Qt::WFlags flags = 0, int index = 0, quint8 state = 0, QString* images = 0);
+    DioPortUI(QWidget *parent = 0, Qt::WindowFlags flags = 0, int index = 0, quint8 state = 0, QString* images = 0);
 	~DioPortUI();
 
 	int getKey();

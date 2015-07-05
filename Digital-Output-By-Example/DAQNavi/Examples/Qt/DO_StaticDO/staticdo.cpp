@@ -1,12 +1,12 @@
 #include "staticdo.h"
 #include <QMessageBox>
 
-StaticDO::StaticDO(QWidget *parent, Qt::WFlags flags)
+StaticDO::StaticDO(QWidget *parent, Qt::WindowFlags flags)
 	: QDialog(parent, flags)
 {
 	ui.setupUi(this);
 	//Set the minimum and close button of the main frame.
-    this->setWindowFlags(Qt::WFlags(Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint));
+    this->setWindowFlags(Qt::WindowFlags(Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint));
 
 	instantDoCtrl = AdxInstantDoCtrlCreate();
 	m_portPanel = NULL;

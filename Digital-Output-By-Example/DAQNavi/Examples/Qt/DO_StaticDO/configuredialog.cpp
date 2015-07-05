@@ -8,7 +8,7 @@ ConfigureDialog::ConfigureDialog(QWidget *parent)
 	ui.setupUi(this);
 
 	//Set the minimum and close button of the main frame.
-    this->setWindowFlags(Qt::WFlags(Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint));
+    this->setWindowFlags(Qt::WindowFlags(Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint));
 
 	connect(ui.btnOK, SIGNAL(clicked()), this, SLOT(ButtonOKClicked()));
 	connect(ui.btnCancel, SIGNAL(clicked()), this, SLOT(ButtonCancelClicked()));
