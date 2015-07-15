@@ -18,12 +18,19 @@ public:
     StaticDO(QWidget *parent = 0);
     ~StaticDO();
     void startSending();
+    void setSpotNum(int SpotNum);
+    int getSpotNum();
     void setKey(int Key);
     int getKey();
     void setState(quint8 State);
     quint8 getState();
     void checkError(ErrorCode errorCode);
     void writeData(int Key, quint8 State);
+    void sendPhase(int Channel, quint8 Phase);
+    void loadPhase();
+    void enableDO();
+    void disableDO();
+
 
 private:
     Ui::Form ui;

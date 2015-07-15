@@ -11,7 +11,6 @@ StaticDO::StaticDO(QWidget *parent)
 
     Key = 0;
     State = (quint8)0;
-    SpotNum = 5;
     CurrentCycleNum = 0;
     CurrentSpotNum = 0;
 
@@ -36,7 +35,7 @@ StaticDO::~StaticDO()
 
 void StaticDO::selectDevice()
 {
-    DeviceName = "USB-4704,BID#0";
+    DeviceName = "USB-4751,BID#0";
     std::wstring description = DeviceName.toStdWString();
     DeviceInformation selected(description.c_str());
     instantDOCtrl = AdxInstantDoCtrlCreate();
@@ -48,11 +47,19 @@ void StaticDO::selectDevice()
 
 void StaticDO::startSending()
 {
-    setState((quint8)1);
-    writeData(Key,State);
     TimerFlag = 0;
     CtrlTimer.singleShot(DutyOnTime,this,SLOT(CtrlTimerFcn()));
     CtrlTimer.start();
+}
+
+void StaticDO::setSpotNum(int SpotNum)
+{
+    this->SpotNum = SpotNum;
+}
+
+int StaticDO::getSpotNum()
+{
+    return this->SpotNum;
 }
 
 void StaticDO::setKey(int Key)
@@ -82,13 +89,59 @@ void StaticDO::writeData(int Key, quint8 State)
     checkError(errorCode);
 }
 
+void StaticDO::sendPhase(int Channel, quint8 Phase)
+{
+    int PortForChannel = 4;
+    int PortForPhase = 5;
+
+    setKey(PortForChannel);
+    setState((quint8)Channel);
+    writeData(Key, State);
+
+    setKey(PortForPhase);
+    setState(Phase);
+    writeData(Key, State);
+}
+
+void StaticDO::loadPhase()
+{
+    int PortForLoad = 3;
+    quint8 ByteForLoad = (quint8)128;
+    quint8 ByteForLock = (quint8)0;
+
+    setKey(PortForLoad);
+    setState(ByteForLoad);
+    writeData(Key, State);
+    setState(ByteForLock);
+    writeData(Key, State);
+}
+
+void StaticDO::enableDO()
+{
+    int PortForEnable = 3;
+    quint8 ByteForEnable = (quint8)64;
+
+    setKey(PortForEnable);
+    setState(ByteForEnable);
+    writeData(Key, State);
+}
+
+void StaticDO::disableDO()
+{
+    int PortForDisable = 3;
+    quint8 ByteForDisable = (quint8)0;
+
+    setKey(PortForDisable);
+    setState(ByteForDisable);
+    writeData(Key, State);
+}
+
 void StaticDO::CtrlTimerFcn()
 {
     switch (TimerFlag){
             case 0:
                 qDebug("timeOn: %d",CurrentCycleNum);
-                setState((quint8)0);
-                writeData(Key,State);
+                disableDO();
                 TimerFlag = 1;
                 CtrlTimer.singleShot(DutyOffTime,this,SLOT(CtrlTimerFcn()));
                 CtrlTimer.start();
@@ -98,8 +151,7 @@ void StaticDO::CtrlTimerFcn()
                 qDebug("timeOff: %d",CurrentCycleNum);
                 if (CurrentCycleNum < CycleNum)
                 {
-                    setState((quint8)1);
-                    writeData(Key,State);
+                    enableDO();
                     TimerFlag = 0;
                     CtrlTimer.singleShot(DutyOnTime,this,SLOT(CtrlTimerFcn()));
                     CtrlTimer.start();
@@ -117,11 +169,10 @@ void StaticDO::CtrlTimerFcn()
                 if (CurrentSpotNum < SpotNum)
                 {
                     CurrentCycleNum = 0;
-                    setState((quint8)1);
-                    writeData(Key,State);
-                    TimerFlag = 0;
-                    CtrlTimer.singleShot(DutyOnTime,this,SLOT(CtrlTimerFcn()));
-                    CtrlTimer.start();
+                    //enableDO();
+                    //TimerFlag = 0;
+                    //CtrlTimer.singleShot(DutyOnTime,this,SLOT(CtrlTimerFcn()));
+                    //CtrlTimer.start();
                 }
                 else if (CurrentSpotNum = SpotNum)
                 {
@@ -143,7 +194,8 @@ void StaticDO::ButtonOKClicked()
     DutyOnTime = qFloor(SonicationPeriod * DutyCycle / 100);
     DutyOffTime = qFloor(SonicationPeriod - DutyOnTime);
     CycleNum = qFloor(SonicationTime*1000 / DutyOnTime);
-    startSending();
+
+    this->accept();
 }
 
 void StaticDO::ButtonCancelClicked()
