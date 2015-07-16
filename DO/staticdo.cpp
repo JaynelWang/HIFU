@@ -9,6 +9,7 @@ StaticDO::StaticDO(QWidget *parent)
     connect(ui.btnOK, SIGNAL(clicked()), this, SLOT(ButtonOKClicked()));
     connect(ui.btnCancel, SIGNAL(clicked()), this, SLOT(ButtonCancelClicked()));
 
+    NumOfTransducer = 112;
     Key = 0;
     State = (quint8)0;
     CurrentCycleNum = 0;
@@ -137,10 +138,10 @@ void StaticDO::disableDO()
 }
 
 void StaticDO::CtrlTimerFcn()
-{
+{   CtrlTimer.stop();
     switch (TimerFlag){
             case 0:
-                qDebug("timeOn: %d",CurrentCycleNum);
+                qDebug("timeOn: %d",CurrentCycleNum+1);
                 disableDO();
                 TimerFlag = 1;
                 CtrlTimer.singleShot(DutyOffTime,this,SLOT(CtrlTimerFcn()));
@@ -166,9 +167,21 @@ void StaticDO::CtrlTimerFcn()
             case 2:
                 CurrentSpotNum += 1;
                 qDebug("timeCool: %d",CurrentSpotNum);
+                CurrentCycleNum = 0;
+
                 if (CurrentSpotNum < SpotNum)
                 {
-                    CurrentCycleNum = 0;
+                    real_T Voltage[112],AngleT[112];
+                    int i;
+                    PhaseInfo(1,Focus_X[CurrentSpotNum],Focus_Y[CurrentSpotNum],Focus_Z[CurrentSpotNum],Voltage,AngleT);
+                    for (i = 1; i <= NumOfTransducer; i++)
+                    {
+                        sendPhase(i,(quint8)AngleT[i-1]);
+                        loadPhase();
+                    }
+                    enableDO();
+                    startSending();
+
                     //enableDO();
                     //TimerFlag = 0;
                     //CtrlTimer.singleShot(DutyOnTime,this,SLOT(CtrlTimerFcn()));
@@ -195,7 +208,18 @@ void StaticDO::ButtonOKClicked()
     DutyOffTime = qFloor(SonicationPeriod - DutyOnTime);
     CycleNum = qFloor(SonicationTime*1000 / DutyOnTime);
 
-    this->accept();
+    //this->accept();
+
+    real_T Voltage[112],AngleT[112];
+    int i;
+    PhaseInfo(1,Focus_X[CurrentSpotNum],Focus_Y[CurrentSpotNum],Focus_Z[CurrentSpotNum],Voltage,AngleT);
+    for (i = 1; i <= NumOfTransducer; i++)
+    {
+        sendPhase(i,(quint8)AngleT[i-1]);
+        loadPhase();
+    }
+    enableDO();
+    startSending();
 }
 
 void StaticDO::ButtonCancelClicked()

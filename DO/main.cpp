@@ -8,15 +8,22 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    uint8_T NumFocus = 1;
+    //uint8_T NumFocus = 1;
     real_T PosXFocus[] = {0,0};
     real_T PosYFocus[] = {0.005,0.006};
     real_T PosZFocus[] = {0.14,0.15};
     int SpotNo = sizeof(PosXFocus) / sizeof(PosXFocus[1]);
 
-    int NumOfTransducer = 112;
+    //int NumOfTransducer = 112;
 
     StaticDO DO;
+    int i;
+    for (i=0;i<SpotNo;i++)
+    {
+        DO.Focus_X.append(PosXFocus[i]);
+        DO.Focus_Y.append(PosYFocus[i]);
+        DO.Focus_Z.append(PosZFocus[i]);
+    }
     /* //For test:
     DO.setKey(3);
     DO.setState((quint8)192);
@@ -31,20 +38,21 @@ int main(int argc, char *argv[])
         a.exit(0);
         return 0;
     }
-    else if (resultDO == QDialog::Accepted)
-    {real_T Voltage[112],AngleT[112];
-    int i,j;
-    for (i = 1; i <= SpotNo; i++)
-        {PhaseInfo(NumFocus,PosXFocus[i],PosYFocus[i],PosZFocus[i],Voltage,AngleT);
-        for (j = 1; j <= NumOfTransducer; j++)
-        {
-            DO.sendPhase(j,(quint8)AngleT[j]);
-            DO.loadPhase();
-        }
+    /*else if (resultDO == QDialog::Accepted)
+        {real_T Voltage[112],AngleT[112];
+        int i,j;
+        for (i = 1; i <= SpotNo; i++)
+            {if (!DO.CtrlTimer.isActive())
+                {PhaseInfo(NumFocus,PosXFocus[i],PosYFocus[i],PosZFocus[i],Voltage,AngleT);
+                for (j = 1; j <= NumOfTransducer; j++)
+                {
+                    DO.sendPhase(j,(quint8)AngleT[j]);
+                    DO.loadPhase();
+                }
 
-        DO.enableDO();
-        DO.startSending();
-        }
-    }
+            DO.enableDO();
+            DO.startSending();}
+            }
+    }*/
     return a.exec();
 }

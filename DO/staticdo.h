@@ -6,8 +6,10 @@
 #include <QObject>
 #include <QTimer>
 #include <QDialog>
+#include <QList>
 #include "inc/bdaqctrl.h"
 #include "ui_staticdo.h"
+#include "PhaseInfo/PhaseInfo.h"
 
 using namespace Automation::BDaq;
 
@@ -31,6 +33,10 @@ public:
     void enableDO();
     void disableDO();
 
+    QList<real_T> Focus_X;
+    QList<real_T> Focus_Y;
+    QList<real_T> Focus_Z;
+
 
 private:
     Ui::Form ui;
@@ -50,6 +56,7 @@ private:
     int SpotNum;
     int CurrentCycleNum;
     int CurrentSpotNum;
+    int NumOfTransducer;
     void selectDevice();
 
 private slots:
