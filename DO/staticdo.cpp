@@ -174,9 +174,9 @@ void StaticDO::CtrlTimerFcn()
                     real_T Voltage[112],AngleT[112];
                     int i;
                     PhaseInfo(1,Focus_X[CurrentSpotNum],Focus_Y[CurrentSpotNum],Focus_Z[CurrentSpotNum],Voltage,AngleT);
-                    for (i = 1; i <= NumOfTransducer; i++)
+                    for (i = 0; i < NumOfTransducer; i++)
                     {
-                        sendPhase(i,(quint8)AngleT[i-1]);
+                        sendPhase(i,(quint8)AngleT[i]);
                         loadPhase();
                     }
                     enableDO();
@@ -213,9 +213,9 @@ void StaticDO::ButtonOKClicked()
     real_T Voltage[112],AngleT[112];
     int i;
     PhaseInfo(1,Focus_X[CurrentSpotNum],Focus_Y[CurrentSpotNum],Focus_Z[CurrentSpotNum],Voltage,AngleT);
-    for (i = 1; i <= NumOfTransducer; i++)
+    for (i = 0; i < NumOfTransducer; i++)
     {
-        sendPhase(i,(quint8)AngleT[i-1]);
+        sendPhase(i,(quint8)AngleT[i]);
         loadPhase();
     }
     enableDO();
