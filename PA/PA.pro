@@ -16,12 +16,14 @@ TEMPLATE = app
 SOURCES += main.cpp\
     poweramp.cpp \
     mainwindow.cpp \
-    SerialPortController/serialportcontroller.cpp
+    SerialPortController/serialportcontroller.cpp \
+    serialportcontroller.cpp
 
 HEADERS  += \
     poweramp.h \
     mainwindow.h \
-    SerialPortController/serialportcontroller.h
+    SerialPortController/serialportcontroller.h \
+    serialportcontroller.h
 
 FORMS += \
     mainwindow.ui
