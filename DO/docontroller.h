@@ -11,28 +11,24 @@ class DOController : public QObject
 public:
     DOController(QWidget *parent = 0);
     ~DOController();
-    int m_sonicationTime;
-    int m_sonicationPeriod;
-    int m_dutyCycle;
-    int m_coolingTime;
+    SonicationParameter m_sonicationParameter;
     int m_dutyOnTime;
     int m_dutyOffTime;
-    int m_cycleNum;
-    void setFocusCoordinate(spotCoordinate focus);
-    void setSpotNum(int spotNum);
-    int getSpotNum();
+    int m_cycleCount;
+    void setSpot(QList<SpotCoordinate> spot);
+    int getSpotCount();
     void startSending();
     void restart();
 
 private:
     StaticDO *m_DO;
-    int m_spotNum;
-    int m_currentCycleNum;
-    int m_currentSpotNum;
-    int m_numOfTransducer;
+    int m_spotCount;
+    int m_currentCycleCount;
+    int m_currentSpotCount;
+    int m_transducerCount;
     int m_timerFlag;
     QTimer m_CtrlTimer;
-    spotCoordinate m_focus;
+    QList<SpotCoordinate> m_spot;
     void sendPhase(int channel, quint8 phase);
     void loadPhase();
     void enableDO();

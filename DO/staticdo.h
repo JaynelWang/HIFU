@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QDialog>
+#include <QString>
 #include "PhaseInfo/PhaseInfo.h"
 #include "inc/bdaqctrl.h"
 #include "definition.h"
@@ -15,20 +16,16 @@ class StaticDO : public QObject
 public:
     StaticDO(QObject *parent = 0);
     ~StaticDO();
-    int m_port;
-    quint8 m_state;
-    void setPort(int port);
-    int getPort();
-    void setState(quint8 state);
-    quint8 getState();
     void writeData(int port, quint8 state);
+
+signals:
+    void errorOccurred(QString error);
 
 private:
     InstantDoCtrl *m_instantDOCtrl;
     QString m_deviceName;
-    InstantDoCtrl * selectDevice(QString deviceName);
+    void selectDevice(QString deviceName);
     void checkError(ErrorCode errorCode);
-
 };
 
 #endif // STATICDO

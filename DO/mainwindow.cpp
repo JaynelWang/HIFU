@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     sonicationTimeUnit_label = new QLabel(this);
     sonicationTime_layout = new QHBoxLayout(this);
     sonicationTime_label->setText("SonicationTime:");
-    sonicationTime_edit->setText(QString::number(defaultParameter.sonicationTime));
+    sonicationTime_edit->setText(QString::number(SONICATIONTIME_DEFAULT));
     sonicationTimeUnit_label->setText("s");
     sonicationTime_layout->addWidget(sonicationTime_label);
     sonicationTime_layout->addWidget(sonicationTime_edit);
@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     sonicationPeriodUnit_label = new QLabel(this);
     sonicationPeriod_layout = new QHBoxLayout(this);
     sonicationPeriod_label->setText("SonicationPeriod:");
-    sonicationPeriod_edit->setText(QString::number(defaultParameter.sonicationPeriod));
+    sonicationPeriod_edit->setText(QString::number(SONICATIONPERIOD_DEFAULT));
     sonicationPeriodUnit_label->setText("ms");
     sonicationPeriod_layout->addWidget(sonicationPeriod_label);
     sonicationPeriod_layout->addWidget(sonicationPeriod_edit);
@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
     dutyCycleUnit_label = new QLabel(this);
     dutyCycle_layout = new QHBoxLayout(this);
     dutyCycle_label->setText("DutyCycle:");
-    dutyCycle_edit->setText(QString::number(defaultParameter.dutyCycle));
+    dutyCycle_edit->setText(QString::number(DUTYCYCLE_DEFAULT));
     dutyCycleUnit_label->setText("%");
     dutyCycle_layout->addWidget(dutyCycle_label);
     dutyCycle_layout->addWidget(dutyCycle_edit);
@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent)
     coolingTimeUnit_label = new QLabel(this);
     coolingTime_layout = new QHBoxLayout(this);
     coolingTime_label->setText("CoolingTime:");
-    coolingTime_edit->setText(QString::number(defaultParameter.coolingTime));
+    coolingTime_edit->setText(QString::number(COOLINGTIME_DEFAULT));
     coolingTimeUnit_label->setText("s");
     coolingTime_layout->addWidget(coolingTime_label);
     coolingTime_layout->addWidget(coolingTime_edit);
@@ -77,13 +77,13 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     //validators for lineedits
-    QIntValidator *validatorForSonicationTime = new QIntValidator(validatorOfLineEdit.sonicationTime_LL,validatorOfLineEdit.sonicationTime_UL,this);
+    QIntValidator *validatorForSonicationTime = new QIntValidator(SONICATIONTIME_LL,SONICATIONPERIOD_UL,this);
     sonicationTime_edit->setValidator(validatorForSonicationTime);
-    QIntValidator *validatorForSonicationPeriod = new QIntValidator(validatorOfLineEdit.sonicationPeriod_LL,validatorOfLineEdit.sonicationPeriod_UL,this);
+    QIntValidator *validatorForSonicationPeriod = new QIntValidator(SONICATIONPERIOD_LL,SONICATIONPERIOD_UL,this);
     sonicationPeriod_edit->setValidator(validatorForSonicationPeriod);
-    QIntValidator *validatorForDutyCycle = new QIntValidator(validatorOfLineEdit.dutyCycle_LL,validatorOfLineEdit.dutyCycle_UL,this);
+    QIntValidator *validatorForDutyCycle = new QIntValidator(DUTYCYCLE_LL,DUTYCYCLE_UL,this);
     dutyCycle_edit->setValidator(validatorForDutyCycle);
-    QIntValidator *validatorForCoolingTime = new QIntValidator(validatorOfLineEdit.coolingTime_LL,validatorOfLineEdit.coolingTime_UL,this);
+    QIntValidator *validatorForCoolingTime = new QIntValidator(COOLINGTIME_LL,COOLINGTIME_UL,this);
     coolingTime_edit->setValidator(validatorForCoolingTime);
 
 
@@ -103,13 +103,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::buttonOKClicked()
 {
-    m_DOController->m_sonicationTime = sonicationTime_edit->text().toInt();
-    m_DOController->m_sonicationPeriod = sonicationPeriod_edit->text().toInt();
-    m_DOController->m_dutyCycle = dutyCycle_edit->text().toInt();
-    m_DOController->m_coolingTime = coolingTime_edit->text().toInt();
-    m_DOController->m_dutyOnTime = qFloor(m_DOController->m_sonicationPeriod * m_DOController->m_dutyCycle / 100);
-    m_DOController->m_dutyOffTime = qFloor(m_DOController->m_sonicationPeriod - m_DOController->m_dutyOnTime);
-    m_DOController->m_cycleNum = qFloor(m_DOController->m_sonicationTime * 1000 / m_DOController->m_dutyOnTime);
+    m_DOController->m_sonicationParameter.time = sonicationTime_edit->text().toInt();
+    m_DOController->m_sonicationParameter.period = sonicationPeriod_edit->text().toInt();
+    m_DOController->m_sonicationParameter.dutyCycle = dutyCycle_edit->text().toInt();
+    m_DOController->m_sonicationParameter.coolingTime = coolingTime_edit->text().toInt();
+    m_DOController->m_dutyOnTime = qFloor(m_DOController->m_sonicationParameter.period * m_DOController->m_sonicationParameter.dutyCycle / 100);
+    m_DOController->m_dutyOffTime = qFloor(m_DOController->m_sonicationParameter.period - m_DOController->m_dutyOnTime);
+    m_DOController->m_cycleCount = qFloor(m_DOController->m_sonicationParameter.time * 1000 / m_DOController->m_dutyOnTime);
     m_DOController->startSending();
 }
 
