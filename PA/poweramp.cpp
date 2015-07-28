@@ -3,7 +3,7 @@
 #include <QBitArray>
 #include <QThread>
 
-PowerAmp::PowerAmp(QSerialPort *serialPort, QObject *parent) : QObject( parent)
+PowerAmp::PowerAmp(QSerialPort *serialPort, QObject *parent) : QObject(parent)
 { 
     m_serialPortController = new SerialPortController(serialPort);
     m_readDoneFlag = 0;
@@ -23,9 +23,9 @@ int PowerAmp::validatePowerAmp(int ID)
     return PowerAmpId;
 }
 
-float PowerAmp::validateVoltage(float Volt)
+double PowerAmp::validateVoltage(double Volt)
 {
-    float VOLT_MAX = 18;
+    double VOLT_MAX = 18;
 
     if (Volt < 0 || Volt > VOLT_MAX)
         Volt = -1;
@@ -59,12 +59,13 @@ QByteArray PowerAmp::getPowerAmpIdByte(int ID)
     return BytePowerAmpId;
 }
 
-QByteArray PowerAmp::getVoltageBytes(PowerAmpAction Action, float Volt)
+QByteArray PowerAmp::getVoltageBytes(PowerAmpAction Action, double Volt)
 {
     QByteArray BytesVolt;
     switch (Action)
        {case RESET:
            BytesVolt.append("0000");
+           break;
         case START:
             if (validateVoltage(Volt) >= 0)
                 {Volt = ceil(validateVoltage(Volt) * 10);
@@ -79,8 +80,11 @@ QByteArray PowerAmp::getVoltageBytes(PowerAmpAction Action, float Volt)
                      BytesVolt.prepend("40");
                     }
                 }
+            break;
         case ECHO:
-            BytesVolt.append("2000");}
+            BytesVolt.append("2000");
+            break;
+    }
     return BytesVolt;
 }
 
@@ -164,7 +168,7 @@ bool PowerAmp::resetAllPowerAmp()
     return Success;
 }
 
-bool PowerAmp::startSinglePowerAmp(int PowerAmpId, float Volt)
+bool PowerAmp::startSinglePowerAmp(int PowerAmpId, double Volt)
 {
     bool Success = false;
     PowerAmpAction PA_Action = START;
@@ -193,7 +197,7 @@ bool PowerAmp::startSinglePowerAmp(int PowerAmpId, float Volt)
     return Success;
 }
 
-bool PowerAmp::startAllPowerAmp(float Volt)
+bool PowerAmp::startAllPowerAmp(double Volt)
 {
     int ID_MIN = 1;
     int ID_MAX = 112;
@@ -227,9 +231,9 @@ bool PowerAmp::startAllPowerAmp(float Volt)
     return Success;
 }
 
-float PowerAmp::echoPowerAmp(int PowerAmpId)
+double PowerAmp::echoPowerAmp(int PowerAmpId)
 {
-    float Volt = -1;
+    double Volt = -1;
     PowerAmpAction PA_Action = ECHO;
 
     QByteArray BytePowerAmpId = getPowerAmpIdByte(PowerAmpId);
@@ -279,18 +283,18 @@ bool PowerAmp::checkReadBytes(QByteArray BytesRead, QByteArray BytesSend)
     return Valid;
 }
 
-float PowerAmp::bytes2voltage(QByteArray BytesEcho)
+double PowerAmp::bytes2voltage(QByteArray BytesEcho)
 {
-    float Volt = -1;
+    double Volt = -1;
     QByteArray BytesEcho_2 = BytesEcho.mid(2,2);
     QByteArray BytesEcho_3 = BytesEcho.mid(4,2);
     bool ok;
 
     int bithigh = BytesEcho_2.toInt(&ok, 16) % 2;
     if (bithigh)
-        Volt = (BytesEcho_3.toInt(&ok, 16) + 128) / 10;
+        Volt = (double)(BytesEcho_3.toInt(&ok, 16) + 128) / 10;
     else
-        Volt = BytesEcho_3.toInt(&ok, 16) / 10;
+        Volt = (double)BytesEcho_3.toInt(&ok, 16) / 10;
     Volt = validateVoltage(Volt);
 
     return Volt;

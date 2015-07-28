@@ -16,8 +16,8 @@ TEMPLATE = app
 SOURCES += main.cpp\
     poweramp.cpp \
     mainwindow.cpp \
-    SerialPortController/serialportcontroller.cpp \
-    serialportcontroller.cpp
+    serialportcontroller.cpp \
+    SerialPortController/serialportcontroller.cpp
 
 HEADERS  += \
     poweramp.h \

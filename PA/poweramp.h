@@ -21,18 +21,18 @@ private:
     QList<int> m_errorPowerAmpIdForReset;
     QList<int> m_errorPowerAmpIdForStart;
     int validatePowerAmp(int ID);
-    float validateVoltage(float Volt);
+    double validateVoltage(double Volt);
     bool validateEcho(QByteArray BytesEcho, QByteArray BytePowerAmpId);
     QByteArray getPowerAmpIdByte(int ID);
-    QByteArray getVoltageBytes(PowerAmpAction Action, float Volt);
+    QByteArray getVoltageBytes(PowerAmpAction Action, double Volt);
     QByteArray getCheckByte(QByteArray BytePowerAmpId, QByteArray BytesVolt );
     bool resetSinglePowerAmp(int PowerAmpId);
     bool resetAllPowerAmp();
-    bool startSinglePowerAmp(int PowerAmpId, float Volt);
-    bool startAllPowerAmp(float Volt);
-    float echoPowerAmp(int PowerAmpId);
+    bool startSinglePowerAmp(int PowerAmpId, double Volt);
+    bool startAllPowerAmp(double Volt);
+    double echoPowerAmp(int PowerAmpId);
     bool checkReadBytes(QByteArray BytesRead, QByteArray BytesSend);
-    float bytes2voltage(QByteArray BytesEcho);
+    double bytes2voltage(QByteArray BytesEcho);
 
 private slots:
     void handleReadDone(QByteArray ReadData);
