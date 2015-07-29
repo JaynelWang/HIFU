@@ -57,3 +57,5 @@ void SerialPortController::startTimer(QTimer &timer)
         timer.start(period);
     }
 }
+
+

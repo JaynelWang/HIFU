@@ -1,29 +1,25 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2015-07-09T16:54:58
+# Project created by QtCreator 2015-07-29T13:49:24
 #
 #-------------------------------------------------
 
 QT       += core gui
+QT       += serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = PA
-INCLUDEPATH += "./SerialPortController"
 TEMPLATE = app
 
 
 SOURCES += main.cpp\
-    poweramp.cpp \
-    mainwindow.cpp \
+        mainwindow.cpp \
     serialportcontroller.cpp \
-    SerialPortController/serialportcontroller.cpp
+    poweramp.cpp
 
-HEADERS  += \
-    poweramp.h \
-    mainwindow.h \
-    SerialPortController/serialportcontroller.h \
-    serialportcontroller.h
+HEADERS  += mainwindow.h \
+    serialportcontroller.h \
+    poweramp.h
 
-FORMS += \
-    mainwindow.ui
+FORMS    += mainwindow.ui

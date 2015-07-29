@@ -24,7 +24,6 @@ private slots:
 private:
     Ui::MainWindow *ui;
     PowerAmp * m_PAController;
-    QSerialPort* identifyProbe();
 };
 
 #endif // MAINWINDOW_H

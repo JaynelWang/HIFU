@@ -2,12 +2,19 @@
 #include <QObject>
 #include <QBitArray>
 #include <QThread>
+#include <QtSerialPort/QSerialPortInfo>
 
-PowerAmp::PowerAmp(QSerialPort *serialPort, QObject *parent) : QObject(parent)
-{ 
-    m_serialPortController = new SerialPortController(serialPort);
-    m_readDoneFlag = 0;
-    connect(this, SIGNAL(readDone(QByteArray)),this,SLOT(handleReadDone(QByteArray)));
+PowerAmp::PowerAmp(QObject *parent) : QObject(parent)
+{
+    QSerialPort* serialPort = identifyProbe();
+    if (serialPort)
+    {
+        m_serialPortController = new SerialPortController(serialPort);
+        connect(m_serialPortController, SIGNAL(readDone(QByteArray)),this,SLOT(handleReadDone(QByteArray)));
+    }
+    m_bytesRead = "";
+
+
 }
 
 int PowerAmp::validatePowerAmp(int ID)
@@ -298,4 +305,27 @@ double PowerAmp::bytes2voltage(QByteArray BytesEcho)
     Volt = validateVoltage(Volt);
 
     return Volt;
+}
+
+QSerialPort* PowerAmp::identifyProbe()
+{
+    QString bytesSend = "81000001";
+    QString bytesEcho = "01000001";
+
+    QList<QSerialPortInfo> serialPortInfoList = QSerialPortInfo::availablePorts();
+    foreach (const QSerialPortInfo &serialPortInfo, serialPortInfoList)
+    {
+        QSerialPort *serialPort = new QSerialPort(serialPortInfo);
+        serialPort->open(QIODevice::ReadWrite);
+
+        serialPort->write(QByteArray::fromHex(bytesSend.toLatin1()));
+        serialPort->waitForReadyRead(500);
+        serialPort->waitForReadyRead(500);
+        QByteArray readData = serialPort->readAll();
+        if (readData == QByteArray::fromHex(bytesEcho.toLatin1()))
+            return serialPort;
+        else
+            delete serialPort;
+    }
+    return NULL;
 }
