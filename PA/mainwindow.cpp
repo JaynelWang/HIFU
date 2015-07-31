@@ -7,29 +7,55 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     m_PAController = new PowerAmp();
-    if (m_PAController->m_serialPortController)
-        ui->textEdit->setText("Open Successfully.");
-    connect(m_PAController->m_serialPortController,SIGNAL(readDone(QByteArray)),SLOT(handleRead(QByteArray)));
-    connect(m_PAController->m_serialPortController,SIGNAL(errorOccur(QString)),SLOT(handleError(QString)));
+    ui->textEdit->setText(m_PAController->m_serialPort->portName());
+    connect(m_PAController->m_serialPort,SIGNAL(readyRead()),SLOT(handleReadyRead()));
+    connect(this,SIGNAL(readDone(QByteArray)),this,SLOT(handleReadDone(QByteArray)));
     connect(ui->pushButton_send,SIGNAL(clicked()),SLOT(handleWrite()));
+    connect(&m_timer,SIGNAL(timeout()),SLOT(handleTimeout()));
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete m_PAController;
 }
 
 void MainWindow::handleWrite()
 {
-    m_PAController->m_serialPortController->write(QByteArray::fromHex(ui->lineEdit->text().toLatin1()));
+    m_PAController->m_serialPort->write(QByteArray::fromHex(ui->lineEdit->text().toLatin1()));
 }
 
-void MainWindow::handleRead(QByteArray readData)
+void MainWindow::handleReadyRead()
 {
+    m_readData.append(m_serialPort->readAll());
+    startTimer(m_timer);
+}
+
+void MainWindow::startTimer(QTimer &timer)
+{
+    if (!timer.isActive())
+    {
+        int period = 500;
+        timer.start(period);
+    }else
+    {
+        timer.stop();
+        int period = 500;
+        timer.start(period);
+    }
+}
+
+void MainWindow::handleTimeout()
+{
+    if (!m_serialPort->bytesAvailable())
+    {
+        QByteArray readData = m_readData;
+        m_readData.clear();
+        emit readDone(readData);
+    }
+}
+
+void MainWindow::handleReadDone(QByteArray readData)
+{  
     ui->textEdit->setText(readData.toHex());
-}
-
-void MainWindow::handleError(QString errorString)
-{
-    ui->label_error->setText(errorString);
 }

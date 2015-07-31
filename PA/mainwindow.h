@@ -15,15 +15,23 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    PowerAmp* m_PAController;
+
+signals:
+    void readDone(QByteArray readData);
 
 private slots:
     void handleWrite();
-    void handleRead(QByteArray readData);
-    void handleError(QString errorString);
+    void handleReadyRead();
+    void handleReadDone(QByteArray readData);
+    void handleTimeout();
 
 private:
     Ui::MainWindow *ui;
-    PowerAmp * m_PAController;
+    QByteArray m_readData;
+    QTimer m_timer;
+    void startTimer(QTimer &timer);
 };
 
 #endif // MAINWINDOW_H
+

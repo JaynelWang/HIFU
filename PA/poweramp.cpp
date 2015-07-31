@@ -2,18 +2,23 @@
 #include <QObject>
 #include <QBitArray>
 #include <QThread>
+#include <QDebug>
 #include <QtSerialPort/QSerialPortInfo>
 
 PowerAmp::PowerAmp(QObject *parent) : QObject(parent)
 {
     QSerialPort* serialPort = identifyProbe();
     if (serialPort)
-    {
-        m_serialPortController = new SerialPortController(serialPort);
-        connect(m_serialPortController, SIGNAL(readDone(QByteArray)),this,SLOT(handleReadDone(QByteArray)));
-    }
-    m_bytesRead = "";
+        m_serialPort = serialPort;
+    if (!m_serialPort->isOpen())
+        m_serialPort->open(QIODevice::ReadWrite);
 
+    connect(m_serialPort,SIGNAL(error(QSerialPort::SerialPortError)),SLOT(handleError(QSerialPort::SerialPortError)));
+    m_bytesRead = "";
+}
+
+PowerAmp::~PowerAmp()
+{
 
 }
 
@@ -44,15 +49,20 @@ bool PowerAmp::validateEcho(QByteArray BytesEcho, QByteArray BytePowerAmpId)
     bool IsEchoBytesValid = false;
     bool ok;
     QByteArray BytesVolt, BytePowerAmpId_Original;
+
     BytesVolt.append(BytesEcho.mid(2,4));
-    BytePowerAmpId_Original.setNum(BytePowerAmpId.toInt(&ok,16) - 128,16);
+    int sum = BytePowerAmpId.toInt(&ok,16) - 128;
+    BytePowerAmpId_Original.setNum(sum,16);
+    if (sum < 16)
+        BytePowerAmpId_Original.prepend("0");
 
     bool IsPowerAmpIdValid = (BytesEcho.mid(0,2) == BytePowerAmpId_Original);
     if (IsPowerAmpIdValid)
-        {bool IsRestBytesValid = (BytesEcho.mid(6,2) == getCheckByte(BytesEcho.mid(0,2), BytesVolt));
+    {
+        bool IsRestBytesValid = (BytesEcho.mid(6,2) == getCheckByte(BytesEcho.mid(0,2), BytesVolt));
          if (IsRestBytesValid)
              IsEchoBytesValid = true;
-        }
+    }
 
     return IsEchoBytesValid;
 }
@@ -75,18 +85,24 @@ QByteArray PowerAmp::getVoltageBytes(PowerAmpAction Action, double Volt)
            break;
         case START:
             if (validateVoltage(Volt) >= 0)
-                {Volt = ceil(validateVoltage(Volt) * 10);
-                 if (Volt >= 128)
-                    {
-                     BytesVolt.setNum((int)Volt - 128, 16);
-                     BytesVolt.prepend("41");
-                    }
-                 else
-                    {
-                     BytesVolt.setNum((int)Volt, 16);
-                     BytesVolt.prepend("40");
-                    }
+            {
+                Volt = ceil(validateVoltage(Volt) * 10);
+                if (Volt >= 128)
+                {
+                    int sum = (int)Volt - 128;
+                    BytesVolt.setNum(sum, 16);
+                    if (sum < 16)
+                        BytesVolt.prepend("0");
+                    BytesVolt.prepend("41");
                 }
+                else
+                {
+                    BytesVolt.setNum((int)Volt, 16);
+                    if ((int)Volt < 16)
+                        BytesVolt.prepend("0");
+                    BytesVolt.prepend("40");
+                }
+            }
             break;
         case ECHO:
             BytesVolt.append("2000");
@@ -101,16 +117,17 @@ QByteArray PowerAmp::getCheckByte(QByteArray BytePowerAmpId, QByteArray BytesVol
     bool ok;
 
     if (!BytePowerAmpId.isEmpty() && !BytesVolt.isEmpty())
-        ByteCheck.setNum(BytesVolt.mid(0,2).toInt(&ok,16) + BytesVolt.mid(2,2).toInt(&ok,16) + BytePowerAmpId.toInt(&ok,16)-128,16);
+    {
+        int sum = BytesVolt.mid(0,2).toInt(&ok,16) + BytesVolt.mid(2,2).toInt(&ok,16) + BytePowerAmpId.toInt(&ok,16);
+        if (sum >255)
+            sum -= 256;
+        if (sum > 127)
+            sum -= 128;
+        ByteCheck.setNum(sum,16);
+        if (sum < 16)
+            ByteCheck.prepend("0");
+    }
     return ByteCheck;
-}
-
-void PowerAmp::handleReadDone(QByteArray ReadData)
-{
-    m_bytesRead.clear();
-    if (!ReadData.isEmpty())
-        m_bytesRead = ReadData;
-    m_readDoneFlag = 1;
 }
 
 bool PowerAmp::resetSinglePowerAmp(int PowerAmpId)
@@ -128,16 +145,23 @@ bool PowerAmp::resetSinglePowerAmp(int PowerAmpId)
         BytesSend.append(BytePowerAmpId);
         BytesSend.append(BytesVolt);
         BytesSend.append(ByteCheck);
-
-        m_serialPortController->write(BytesSend);
-        while (!m_readDoneFlag)
+        m_serialPort->write(QByteArray::fromHex(BytesSend));
+        int n = 0;
+        if (m_serialPort->waitForReadyRead(5))
         {
+            n += 1;
         }
+        qDebug("resetSingle time : %d ms" , n*5);
+        //qint64 isBytesAvailable = m_serialPort->bytesAvailable();
+        m_bytesRead = m_serialPort->readAll();
         if (!m_bytesRead.isEmpty())
-            {if (checkReadBytes(m_bytesRead, BytesSend))
-             Success = true;}
-        m_readDoneFlag = 0;
+        {
+            if (checkReadBytes(m_bytesRead.toHex(), BytesSend))
+                Success = true;
+        }
     }
+
+    m_bytesRead = "";
     return Success;
 }
 
@@ -191,16 +215,23 @@ bool PowerAmp::startSinglePowerAmp(int PowerAmpId, double Volt)
         BytesSend.append(BytesVolt);
         BytesSend.append(ByteCheck);
 
-        m_serialPortController->write(BytesSend);
-        while (!m_readDoneFlag)
+        m_serialPort->write(QByteArray::fromHex(BytesSend));
+        int n = 0;
+        if (m_serialPort->waitForReadyRead(5))
         {
+            n += 1;
         }
+        qDebug("startSingle time : %d ms" , n*5);
+        //qint64 isBytesAvailable = m_serialPort->bytesAvailable();
+        m_bytesRead = m_serialPort->readAll();
         if (!m_bytesRead.isEmpty())
-            {if (checkReadBytes(m_bytesRead, BytesSend))
-             Success = true;}
-
-        m_readDoneFlag = 0;
+        {
+            if (checkReadBytes(m_bytesRead.toHex(), BytesSend))
+            Success = true;
+        }
     }
+
+    m_bytesRead = "";
     return Success;
 }
 
@@ -254,10 +285,15 @@ double PowerAmp::echoPowerAmp(int PowerAmpId)
         BytesSend.append(BytesVolt);
         BytesSend.append(ByteCheck);
 
-        m_serialPortController->write(BytesSend);
-        while (!m_readDoneFlag)
+        m_serialPort->write(QByteArray::fromHex(BytesSend));
+        int n = 0;
+        if (m_serialPort->waitForReadyRead(5))
         {
+            n += 1;
         }
+        qDebug("echoPowerAmp time : %d ms" , n*5);
+        m_bytesRead = m_serialPort->readAll();
+        m_bytesRead = m_bytesRead.toHex();
         bool IsLengthValid = (m_bytesRead.size() / 2 == 4);
         if (IsLengthValid)
         {
@@ -266,6 +302,8 @@ double PowerAmp::echoPowerAmp(int PowerAmpId)
                 Volt = bytes2voltage(m_bytesRead);
         }
     }
+
+    m_bytesRead = "";
     return Volt;
 }
 
@@ -278,7 +316,10 @@ bool PowerAmp::checkReadBytes(QByteArray BytesRead, QByteArray BytesSend)
     bool IsLengthValid = (LengthOfBytesRead == 4);
     if (IsLengthValid)
         {QByteArray BytePowerAmpId_Original;
-         BytePowerAmpId_Original.setNum(BytesSend.mid(0,2).toInt(&ok, 16) - 128, 16);
+        int sum = BytesSend.mid(0,2).toInt(&ok, 16) - 128;
+         BytePowerAmpId_Original.setNum(sum, 16);
+         if (sum < 16)
+             BytePowerAmpId_Original.prepend("0");
          bool IsReadBytesValid = (BytesRead.mid(0,2) == BytePowerAmpId_Original &&
                                   BytesRead.mid(2,2) == BytesSend.mid(2,2) &&
                                   BytesRead.mid(4,2) == BytesSend.mid(4,2) &&
@@ -317,9 +358,7 @@ QSerialPort* PowerAmp::identifyProbe()
     {
         QSerialPort *serialPort = new QSerialPort(serialPortInfo);
         serialPort->open(QIODevice::ReadWrite);
-
         serialPort->write(QByteArray::fromHex(bytesSend.toLatin1()));
-        serialPort->waitForReadyRead(500);
         serialPort->waitForReadyRead(500);
         QByteArray readData = serialPort->readAll();
         if (readData == QByteArray::fromHex(bytesEcho.toLatin1()))
@@ -328,4 +367,9 @@ QSerialPort* PowerAmp::identifyProbe()
             delete serialPort;
     }
     return NULL;
+}
+
+void PowerAmp::handleError(QSerialPort::SerialPortError error)
+{
+    emit errorOccur(m_serialPort->errorString());
 }

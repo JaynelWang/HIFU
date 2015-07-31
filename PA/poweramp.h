@@ -4,30 +4,28 @@
 #include <QObject>
 #include <QByteArray>
 #include <QList>
-#include "serialportcontroller.h"
+#include <QtSerialPort/QSerialPort>
 
 class PowerAmp : public QObject
 {
     Q_OBJECT
+
 public:
     PowerAmp(QObject *parent = 0);
     ~PowerAmp();
-    SerialPortController *m_serialPortController;
-    bool resetSinglePowerAmp(int PowerAmpId);
-    bool resetAllPowerAmp();
-    bool startSinglePowerAmp(int PowerAmpId, double Volt);
-    bool startAllPowerAmp(double Volt);
-    double echoPowerAmp(int PowerAmpId);
     bool resetSinglePowerAmp(int PowerAmpId);
     bool resetAllPowerAmp();
     bool startSinglePowerAmp(int PowerAmpId, double Volt);
     bool startAllPowerAmp(double Volt);
     double echoPowerAmp(int PowerAmpId);
 
+signals:
+    void errorOccur(QString errorString);
+
 private:
-    enum PowerAmpAction{RESET,START,ECHO};
-    QByteArray m_bytesRead;
-    int m_readDoneFlag;
+    enum PowerAmpAction{RESET,START,ECHO};    
+    QSerialPort* m_serialPort;
+    QByteArray m_bytesRead;    
     QList<int> m_errorPowerAmpIdForReset;
     QList<int> m_errorPowerAmpIdForStart;
     QSerialPort* identifyProbe();
@@ -41,7 +39,8 @@ private:
     double bytes2voltage(QByteArray BytesEcho);
 
 private slots:
-    void handleReadDone(QByteArray ReadData);
+    void handleError(QSerialPort::SerialPortError error);
 };
 
 #endif // POWERAMP
+
