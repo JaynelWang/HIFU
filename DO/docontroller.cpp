@@ -54,7 +54,7 @@ void DOController::disableDO()
 
 void DOController::startSending()
 {
-    real_T Voltage[112],AngleT[112];
+    real_T Voltage[112],AngleT[144];
     spotForCount spotCount = 1;
     int i;
     PhaseInfo(spotCount,m_spot[m_currentSpotCount].spot_X,m_spot[m_currentSpotCount].spot_Y,m_spot[m_currentSpotCount].spot_Z,Voltage,AngleT);
