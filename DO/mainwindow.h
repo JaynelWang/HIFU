@@ -36,6 +36,7 @@ private:
     QLabel *dutyCycleUnit_label;
     QLabel *coolingTimeUnit_label;
     QPushButton *ok_btn;
+    QPushButton *pause_btn;
     QPushButton *restart_btn;
     QPushButton *cancel_btn;
     QHBoxLayout *sonicationTime_layout;
@@ -48,6 +49,7 @@ private:
 private slots:
     void buttonCancelClicked();
     void buttonOKClicked();
+    void buttonPauseClicked();
     void buttonRestartClicked();
 };
 

@@ -55,13 +55,16 @@ MainWindow::MainWindow(QWidget *parent)
     coolingTime_layout->addWidget(coolingTimeUnit_label);
 
     ok_btn = new QPushButton(this);
+    pause_btn = new QPushButton(this);
     restart_btn = new QPushButton(this);
     cancel_btn = new QPushButton(this);
     button_layout = new QHBoxLayout(this);
     ok_btn->setText("OK");
+    pause_btn->setText("Pause");
     restart_btn->setText("Restart");
     cancel_btn->setText("Cancel");
     button_layout->addWidget(ok_btn);
+    button_layout->addWidget(pause_btn);
     button_layout->addWidget(restart_btn);
     button_layout->addWidget(cancel_btn);
 
@@ -89,6 +92,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     //connecting signals and slots
     connect(ok_btn, SIGNAL(clicked()), SLOT(buttonOKClicked()));
+    connect(pause_btn,SIGNAL(clicked()),SLOT(buttonPauseClicked()));
     connect(restart_btn, SIGNAL(clicked()), SLOT(buttonRestartClicked()));
     connect(cancel_btn, SIGNAL(clicked()), SLOT(buttonCancelClicked()));
 
@@ -121,4 +125,9 @@ void MainWindow::buttonCancelClicked()
 void MainWindow::buttonRestartClicked()
 {
     m_DOController->restart();
+}
+
+void MainWindow::buttonPauseClicked()
+{
+    m_DOController->pauseSending();
 }

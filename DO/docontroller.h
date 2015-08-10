@@ -18,6 +18,7 @@ public:
     void setSpot(QList<SpotCoordinate> spot);
     int getSpotCount();
     void startSending();
+    void pauseSending();
     void restart();
 
 private:

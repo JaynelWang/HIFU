@@ -7,6 +7,8 @@ DOController::DOController(QWidget *parent) : QObject(parent)
     m_currentCycleCount = 0;
     m_currentSpotCount = 0;
     m_transducerCount = 112;
+    m_CtrlTimer.setSingleShot(true);
+    connect(&m_CtrlTimer,SIGNAL(timeout()),SLOT(CtrlTimerFcn()));
 }
 
 DOController::~DOController()
@@ -54,7 +56,7 @@ void DOController::disableDO()
 
 void DOController::startSending()
 {
-    real_T Voltage[112],AngleT[144];
+    real_T Voltage[112],AngleT[112];
     spotForCount spotCount = 1;
     int i;
     PhaseInfo(spotCount,m_spot[m_currentSpotCount].spot_X,m_spot[m_currentSpotCount].spot_Y,m_spot[m_currentSpotCount].spot_Z,Voltage,AngleT);
@@ -66,8 +68,15 @@ void DOController::startSending()
     enableDO();
 
     m_timerFlag = 0;
-    m_CtrlTimer.singleShot(m_dutyOnTime,this,SLOT(CtrlTimerFcn()));
-    m_CtrlTimer.start();
+    m_CtrlTimer.start(m_dutyOnTime);
+}
+
+void DOController::pauseSending()
+{
+    if (m_CtrlTimer.isActive())
+        m_CtrlTimer.stop();
+    m_currentCycleCount = 0;
+    m_currentSpotCount = 0;
 }
 
 void DOController::restart()
@@ -81,14 +90,13 @@ void DOController::restart()
 
 void DOController::CtrlTimerFcn()
 {
-    m_CtrlTimer.stop();
+    //m_CtrlTimer.stop();
     switch (m_timerFlag){
         case 0:
             qDebug("timeOn: %d",m_currentCycleCount + 1);
             disableDO();
             m_timerFlag = 1;
-            m_CtrlTimer.singleShot(m_dutyOffTime,this,SLOT(CtrlTimerFcn()));
-            m_CtrlTimer.start();
+            m_CtrlTimer.start(m_dutyOffTime);
             break;
         case 1:
             m_currentCycleCount += 1;
@@ -97,14 +105,12 @@ void DOController::CtrlTimerFcn()
             {
                 enableDO();
                 m_timerFlag = 0;
-                m_CtrlTimer.singleShot(m_dutyOnTime,this,SLOT(CtrlTimerFcn()));
-                m_CtrlTimer.start();
+                m_CtrlTimer.start(m_dutyOnTime);
             }
             else if (m_currentCycleCount = m_cycleCount)
             {
                 m_timerFlag = 2;
-                m_CtrlTimer.singleShot(m_sonicationParameter.coolingTime*1000,this,SLOT(CtrlTimerFcn()));
-                m_CtrlTimer.start();
+                m_CtrlTimer.start(m_sonicationParameter.coolingTime*1000);
             }
             break;
         case 2:
