@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "poweramp.h"
+#include <QTimer>
 
 namespace Ui {
 class MainWindow;

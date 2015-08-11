@@ -15,7 +15,8 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    poweramp.cpp
+    poweramp.cpp \
+    logging_define.cpp
 
 HEADERS  += mainwindow.h \
     poweramp.h

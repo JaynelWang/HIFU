@@ -5,6 +5,10 @@
 #include <QByteArray>
 #include <QList>
 #include <QtSerialPort/QSerialPort>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(SerialPort_connection)
+Q_DECLARE_LOGGING_CATEGORY(Test_module)
 
 class PowerAmp : public QObject
 {
@@ -18,13 +22,13 @@ public:
     bool startSinglePowerAmp(int PowerAmpId, double Volt);
     bool startAllPowerAmp(double Volt);
     double echoPowerAmp(int PowerAmpId);
-
+QSerialPort* m_serialPort;
 signals:
     void errorOccur(QString errorString);
 
 private:
     enum PowerAmpAction{RESET,START,ECHO};    
-    QSerialPort* m_serialPort;
+
     QByteArray m_bytesRead;    
     QList<int> m_errorPowerAmpIdForReset;
     QList<int> m_errorPowerAmpIdForStart;

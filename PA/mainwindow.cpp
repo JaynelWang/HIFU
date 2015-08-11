@@ -27,7 +27,7 @@ void MainWindow::handleWrite()
 
 void MainWindow::handleReadyRead()
 {
-    m_readData.append(m_serialPort->readAll());
+    m_readData.append(m_PAController->m_serialPort->readAll());
     startTimer(m_timer);
 }
 
@@ -47,7 +47,8 @@ void MainWindow::startTimer(QTimer &timer)
 
 void MainWindow::handleTimeout()
 {
-    if (!m_serialPort->bytesAvailable())
+    m_timer.stop();
+    if (!m_PAController->m_serialPort->bytesAvailable())
     {
         QByteArray readData = m_readData;
         m_readData.clear();

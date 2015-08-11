@@ -3,23 +3,37 @@
 #include <QBitArray>
 #include <QThread>
 #include <QDebug>
+#include <QTime>
+#include <random>
 #include <QtSerialPort/QSerialPortInfo>
+#include <QMessageBox>
+
+Q_LOGGING_CATEGORY(SerialPort_connection,"Power Amplifier Module ")
+Q_LOGGING_CATEGORY(Test_module,"Test Module ")
 
 PowerAmp::PowerAmp(QObject *parent) : QObject(parent)
 {
     QSerialPort* serialPort = identifyProbe();
     if (serialPort)
+    {
         m_serialPort = serialPort;
-    if (!m_serialPort->isOpen())
-        m_serialPort->open(QIODevice::ReadWrite);
-
-    connect(m_serialPort,SIGNAL(error(QSerialPort::SerialPortError)),SLOT(handleError(QSerialPort::SerialPortError)));
+        qCDebug(SerialPort_connection()) << SerialPort_connection().categoryName() << ":" << "Successfully connected";
+        if (!m_serialPort->isOpen())
+            m_serialPort->open(QIODevice::ReadWrite);
+        connect(m_serialPort,SIGNAL(error(QSerialPort::SerialPortError)),SLOT(handleError(QSerialPort::SerialPortError)));
+    }
+    else
+    {
+        QString message = "Connection failure.";
+        QMessageBox::information(NULL,"Warning Information", message,QMessageBox::Ok);
+        qCDebug(SerialPort_connection()) << SerialPort_connection().categoryName() << ":" << "Connection failure";
+    }
     m_bytesRead = "";
 }
 
 PowerAmp::~PowerAmp()
 {
-
+    qCDebug(SerialPort_connection()) << SerialPort_connection().categoryName() << ":" << "End";
 }
 
 int PowerAmp::validatePowerAmp(int ID)
@@ -72,7 +86,7 @@ QByteArray PowerAmp::getPowerAmpIdByte(int ID)
     QByteArray BytePowerAmpId;
 
     if (validatePowerAmp(ID) >= 0)
-        BytePowerAmpId = QByteArray::number(validatePowerAmp(ID) + 128, 16).toUpper();
+        BytePowerAmpId = QByteArray::number(validatePowerAmp(ID) + 128, 16);
     return BytePowerAmpId;
 }
 
@@ -146,13 +160,12 @@ bool PowerAmp::resetSinglePowerAmp(int PowerAmpId)
         BytesSend.append(BytesVolt);
         BytesSend.append(ByteCheck);
         m_serialPort->write(QByteArray::fromHex(BytesSend));
-        int n = 0;
-        if (m_serialPort->waitForReadyRead(5))
-        {
-            n += 1;
-        }
-        qDebug("resetSingle time : %d ms" , n*5);
-        //qint64 isBytesAvailable = m_serialPort->bytesAvailable();
+        m_serialPort->waitForReadyRead(400);
+        m_serialPort->waitForReadyRead(400);
+        qint64 BytesAvailable = m_serialPort->bytesAvailable();
+        bool isEqual = BytesAvailable == (qint64)4;
+        if (!isEqual)
+            qCDebug(Test_module()) <<"channel"<< PowerAmpId << ":Echo data less than 4.";
         m_bytesRead = m_serialPort->readAll();
         if (!m_bytesRead.isEmpty())
         {
@@ -216,13 +229,21 @@ bool PowerAmp::startSinglePowerAmp(int PowerAmpId, double Volt)
         BytesSend.append(ByteCheck);
 
         m_serialPort->write(QByteArray::fromHex(BytesSend));
-        int n = 0;
-        if (m_serialPort->waitForReadyRead(5))
+        int waitPeriod = 1000;
+        if (m_serialPort->waitForReadyRead(waitPeriod))
         {
-            n += 1;
+            qDebug() << "ready read signal emitted.";
         }
-        qDebug("startSingle time : %d ms" , n*5);
-        //qint64 isBytesAvailable = m_serialPort->bytesAvailable();
+        qDebug()<<m_serialPort->bytesAvailable();
+        if (m_serialPort->waitForReadyRead(waitPeriod))
+        {
+            qDebug() << "ready read signal emitted.";
+        }
+        qDebug()<<m_serialPort->bytesAvailable();
+        qint64 BytesAvailable = m_serialPort->bytesAvailable();
+        bool isEqual = BytesAvailable == (qint64)4;
+        if (!isEqual)
+            qCDebug(Test_module()) <<"channel"<< PowerAmpId << ":Echo data less than 4.";
         m_bytesRead = m_serialPort->readAll();
         if (!m_bytesRead.isEmpty())
         {
@@ -230,7 +251,6 @@ bool PowerAmp::startSinglePowerAmp(int PowerAmpId, double Volt)
             Success = true;
         }
     }
-
     m_bytesRead = "";
     return Success;
 }
@@ -286,12 +306,12 @@ double PowerAmp::echoPowerAmp(int PowerAmpId)
         BytesSend.append(ByteCheck);
 
         m_serialPort->write(QByteArray::fromHex(BytesSend));
-        int n = 0;
-        if (m_serialPort->waitForReadyRead(5))
-        {
-            n += 1;
-        }
-        qDebug("echoPowerAmp time : %d ms" , n*5);
+        m_serialPort->waitForReadyRead(400);
+        m_serialPort->waitForReadyRead(400);
+        qint64 BytesAvailable = m_serialPort->bytesAvailable();
+        bool isEqual = BytesAvailable == (qint64)4;
+        if (!isEqual)
+            qCDebug(Test_module()) <<"channel"<< PowerAmpId << ":Echo data less than 4.";
         m_bytesRead = m_serialPort->readAll();
         m_bytesRead = m_bytesRead.toHex();
         bool IsLengthValid = (m_bytesRead.size() / 2 == 4);
@@ -350,23 +370,49 @@ double PowerAmp::bytes2voltage(QByteArray BytesEcho)
 
 QSerialPort* PowerAmp::identifyProbe()
 {
-    QString bytesSend = "81000001";
-    QString bytesEcho = "01000001";
+        //generate a random channel number
+        QTime time;
+        time = QTime::currentTime();
+        qsrand(time.msec() + time.second()*1000);
+        int random_channel = qrand()%112;
+        while (!random_channel)
+        {
+            random_channel = qrand()%112;
+        }
 
-    QList<QSerialPortInfo> serialPortInfoList = QSerialPortInfo::availablePorts();
-    foreach (const QSerialPortInfo &serialPortInfo, serialPortInfoList)
-    {
-        QSerialPort *serialPort = new QSerialPort(serialPortInfo);
-        serialPort->open(QIODevice::ReadWrite);
-        serialPort->write(QByteArray::fromHex(bytesSend.toLatin1()));
-        serialPort->waitForReadyRead(500);
-        QByteArray readData = serialPort->readAll();
-        if (readData == QByteArray::fromHex(bytesEcho.toLatin1()))
-            return serialPort;
-        else
-            delete serialPort;
-    }
-    return NULL;
+        //generate bytesSend
+        QByteArray BytePowerAmpId = getPowerAmpIdByte(random_channel);
+        QByteArray BytesVolt = "0000";
+        QByteArray ByteCheck = getCheckByte(BytePowerAmpId, BytesVolt);
+        QByteArray bytesSend;
+        bytesSend.append(BytePowerAmpId);
+        bytesSend.append(BytesVolt);
+        bytesSend.append(ByteCheck);
+
+        //generate bytesEcho
+        QByteArray BytePowerAmpId_Original;
+        BytePowerAmpId_Original.setNum(random_channel,16);
+        if (random_channel < 16)
+            BytePowerAmpId_Original.prepend("0");
+        QByteArray bytesEcho;
+        bytesEcho.append(BytePowerAmpId_Original);
+        bytesEcho.append(BytesVolt);
+        bytesEcho.append(BytePowerAmpId_Original);
+
+        QList<QSerialPortInfo> serialPortInfoList = QSerialPortInfo::availablePorts();
+        foreach (const QSerialPortInfo &serialPortInfo, serialPortInfoList)
+        {
+            QSerialPort *serialPort = new QSerialPort(serialPortInfo);
+            serialPort->open(QIODevice::ReadWrite);
+            serialPort->write(QByteArray::fromHex(bytesSend));
+            serialPort->waitForReadyRead(500);
+            QByteArray readData = serialPort->readAll();
+            if (readData == QByteArray::fromHex(bytesEcho))
+                return serialPort;
+            else
+                delete serialPort;
+        }
+            return NULL;
 }
 
 void PowerAmp::handleError(QSerialPort::SerialPortError error)
