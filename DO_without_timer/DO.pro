@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2015-07-05T20:24:05
+# Project created by QtCreator 2015-07-19T20:15:19
 #
 #-------------------------------------------------
 
@@ -10,10 +10,9 @@ QT       += widgets
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = DO
-CONFIG   += console
-CONFIG   -= app_bundle
 INCLUDEPATH += "./PhaseInfo"
 TEMPLATE = app
+
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -42,7 +41,8 @@ SOURCES += main.cpp\
     PhaseInfo/rtGetInf.c \
     PhaseInfo/rtGetNaN.c \
     PhaseInfo/sin.c \
-    PhaseInfo/sum.c
+    PhaseInfo/sum.c \
+    docontroller.cpp
 
 HEADERS  += mainwindow.h \
     staticdo.h \
@@ -75,7 +75,5 @@ HEADERS  += mainwindow.h \
     PhaseInfo/rtwtypes.h \
     PhaseInfo/sin.h \
     PhaseInfo/sum.h \
-    ui_staticdo.h
-
-FORMS += \
-    staticdo.ui
+    definition.h \
+    docontroller.h

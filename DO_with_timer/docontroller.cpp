@@ -56,10 +56,16 @@ void DOController::disableDO()
 
 void DOController::startSending()
 {
-    real_T Voltage[112],AngleT[112];
+    real_T Voltage[112], AngleT[112], temp;
     spotForCount spotCount = 1;
     int i;
     PhaseInfo(spotCount,m_spot[m_currentSpotCount].spot_X,m_spot[m_currentSpotCount].spot_Y,m_spot[m_currentSpotCount].spot_Z,Voltage,AngleT);
+    //exchange the phases of channel 35 and 36
+    temp = AngleT[34];
+    AngleT[34] = AngleT[35];
+    AngleT[35] = temp;
+
+    //start sending
     for (i = 0; i < m_transducerCount; i++)
     {
         sendPhase(i,(quint8)AngleT[i]);
