@@ -12,13 +12,12 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = PA
 TEMPLATE = app
 
+INCLUDEPATH += ../lib
+LIBS += ../bin/PowerAmp.dll
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    poweramp.cpp \
-    logging_define.cpp
 
-HEADERS  += mainwindow.h \
-    poweramp.h
+HEADERS  += mainwindow.h
 
 FORMS    += mainwindow.ui

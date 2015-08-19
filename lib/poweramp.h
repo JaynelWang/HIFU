@@ -1,6 +1,7 @@
-#ifndef POWERAMP
-#define POWERAMP
+#ifndef POWERAMP_H
+#define POWERAMP_H
 
+#include "poweramp_global.h"
 #include <QObject>
 #include <QByteArray>
 #include <QList>
@@ -10,7 +11,7 @@
 Q_DECLARE_LOGGING_CATEGORY(SerialPort_connection)
 Q_DECLARE_LOGGING_CATEGORY(Test_module)
 
-class PowerAmp : public QObject
+class POWERAMPSHARED_EXPORT PowerAmp : public QObject
 {
     Q_OBJECT
 
@@ -22,14 +23,14 @@ public:
     bool startSinglePowerAmp(int PowerAmpId, double Volt);
     bool startAllPowerAmp(double Volt);
     double echoPowerAmp(int PowerAmpId);
-QSerialPort* m_serialPort;
+    QSerialPort* m_serialPort;
+
 signals:
     void errorOccur(QString errorString);
 
 private:
-    enum PowerAmpAction{RESET,START,ECHO};    
-
-    QByteArray m_bytesRead;    
+    enum PowerAmpAction{RESET,START,ECHO};
+    QByteArray m_bytesRead;
     QList<int> m_errorPowerAmpIdForReset;
     QList<int> m_errorPowerAmpIdForStart;
     QSerialPort* identifyProbe();
@@ -38,7 +39,7 @@ private:
     bool validateEcho(QByteArray BytesEcho, QByteArray BytePowerAmpId);
     QByteArray getPowerAmpIdByte(int ID);
     QByteArray getVoltageBytes(PowerAmpAction Action, double Volt);
-    QByteArray getCheckByte(QByteArray BytePowerAmpId, QByteArray BytesVolt );    
+    QByteArray getCheckByte(QByteArray BytePowerAmpId, QByteArray BytesVolt );
     bool checkReadBytes(QByteArray BytesRead, QByteArray BytesSend);
     double bytes2voltage(QByteArray BytesEcho);
 
@@ -46,5 +47,5 @@ private slots:
     void handleError(QSerialPort::SerialPortError error);
 };
 
-#endif // POWERAMP
+#endif // POWERAMP_H
 
