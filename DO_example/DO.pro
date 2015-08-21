@@ -13,10 +13,11 @@ TARGET = DO
 INCLUDEPATH += "./PhaseInfo"
 TEMPLATE = app
 
+INCLUDEPATH += ../lib
+LIBS += -L../bin -lDOController
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    staticdo.cpp \
     PhaseInfo/abs.c \
     PhaseInfo/angle.c \
     PhaseInfo/ArrayDiv.c \
@@ -41,12 +42,9 @@ SOURCES += main.cpp\
     PhaseInfo/rtGetInf.c \
     PhaseInfo/rtGetNaN.c \
     PhaseInfo/sin.c \
-    PhaseInfo/sum.c \
-    docontroller.cpp
+    PhaseInfo/sum.c
 
 HEADERS  += mainwindow.h \
-    staticdo.h \
-    Inc/bdaqctrl.h \
     PhaseInfo/abs.h \
     PhaseInfo/angle.h \
     PhaseInfo/ArrayDiv.h \
@@ -74,6 +72,4 @@ HEADERS  += mainwindow.h \
     PhaseInfo/rtGetNaN.h \
     PhaseInfo/rtwtypes.h \
     PhaseInfo/sin.h \
-    PhaseInfo/sum.h \
-    definition.h \
-    docontroller.h
+    PhaseInfo/sum.h

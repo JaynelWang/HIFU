@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include "definition.h"
 #include <QIntValidator>
 #include <QString>
 #include <QtMath>
