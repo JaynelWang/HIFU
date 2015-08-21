@@ -1,7 +1,7 @@
 #ifndef DEFINITION
 #define DEFINITION
 
-//#include "PhaseInfo/PhaseInfo.h"
+#include "PhaseInfo/PhaseInfo.h"
 #include <QList>
 #define DEVICE_ID "USB-4751,BID#0"
 #define SONICATIONTIME_LL 6
@@ -22,6 +22,16 @@
 #define PORT_ENABLE 3
 #define PORT_DISABLE 3
 
+typedef real_T coordinate;
+typedef uint8_T spotForCount;
+
+struct SpotCoordinate
+{
+    coordinate spot_X;
+    coordinate spot_Y;
+    coordinate spot_Z;
+};
+
 struct SonicationParameter
 {
     int time;
@@ -30,11 +40,11 @@ struct SonicationParameter
     int coolingTime;
 };
 
-//struct TreatmentPlan
-//{
-//    QList<SpotCoordinate> spot;
-//    QList<SonicationParameter> spotParameters;
-//};
+struct TreatmentPlan
+{
+    QList<SpotCoordinate> spot;
+    QList<SonicationParameter> spotParameters;
+};
 
 #endif // DEFINITION
 
