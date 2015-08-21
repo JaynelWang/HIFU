@@ -8,10 +8,22 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include "docontroller.h"
+#include "PhaseInfo/PhaseInfo.h"
+#include <QTimer>
 
 namespace Ui {
 class MainWindow;
 }
+
+typedef real_T coordinate;
+typedef uint8_T spotForCount;
+
+struct SpotCoordinate
+{
+    coordinate spot_X;
+    coordinate spot_Y;
+    coordinate spot_Z;
+};
 
 class MainWindow : public QMainWindow
 {
