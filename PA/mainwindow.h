@@ -2,12 +2,14 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "lib/poweramp.h"
+#include "poweramp.h"
 #include <QTimer>
 
 namespace Ui {
 class MainWindow;
 }
+
+Q_DECLARE_LOGGING_CATEGORY(Test_module)
 
 class MainWindow : public QMainWindow
 {

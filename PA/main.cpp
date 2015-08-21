@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "lib/logging_define.cpp"
+#include "logging_define.cpp"
 #include <QApplication>
 #include <QDebug>
 #include <QThread>
@@ -155,8 +155,11 @@ int main(int argc, char *argv[])
     qCWarning(Test_module()) << Test_module().categoryName() <<":" << "End testing";
     qCWarning(Test_module())<<"======================================";
     runTimes += 1;
+    if (runTimes == 10)
+        break;
     }
     }
+
     return a.exec();
 }
 

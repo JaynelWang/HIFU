@@ -12,8 +12,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = PA
 TEMPLATE = app
 
-INCLUDEPATH += ../lib
-LIBS += ../bin/PowerAmp.dll
+INCLUDEPATH += ./lib
+LIBS += -L../bin -lPowerAmp
 
 SOURCES += main.cpp\
         mainwindow.cpp \

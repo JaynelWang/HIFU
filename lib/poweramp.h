@@ -23,13 +23,13 @@ public:
     bool startSinglePowerAmp(int PowerAmpId, double Volt);
     bool startAllPowerAmp(double Volt);
     double echoPowerAmp(int PowerAmpId);
-    QSerialPort* m_serialPort;
-
+QSerialPort* m_serialPort;
 signals:
     void errorOccur(QString errorString);
 
 private:
     enum PowerAmpAction{RESET,START,ECHO};
+
     QByteArray m_bytesRead;
     QList<int> m_errorPowerAmpIdForReset;
     QList<int> m_errorPowerAmpIdForStart;
@@ -48,4 +48,3 @@ private slots:
 };
 
 #endif // POWERAMP_H
-

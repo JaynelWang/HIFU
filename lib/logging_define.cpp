@@ -26,7 +26,7 @@ void logMessageOutput(QtMsgType type, const QMessageLogContext &context, const Q
             log += QString("Fatal: %1\r\n").arg(msg);
             abort();
     }
-    QString fileName = "D:\\log.log";
+    QString fileName = "./LoggingRecord.log";
     QFile outFile(fileName);
     if (outFile.open(QIODevice::WriteOnly | QIODevice::Append))
     {
@@ -35,7 +35,7 @@ void logMessageOutput(QtMsgType type, const QMessageLogContext &context, const Q
         outFile.close();
     }
 
-    QString warningFile = "D:\\warning.log";
+    QString warningFile = "./WarningRecord.log";
     QFile outfile(warningFile);
     if (outfile.open(QIODevice::WriteOnly | QIODevice::Append))
     {
